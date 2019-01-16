@@ -1,6 +1,6 @@
 import numpy as np
 
-class GenericTrainingAlgorithm:
+class GenericTrainingAlgorithm(object):
     def fit(self, x_train, y_train, feature_map, loss, alpha, nb_it, lr, d, nb_samples=None):
         """ feature_map : fonction qui associe à chaque couple (x,y) un vecteur de dimension d,
             alpha : coefficient de régularisation
@@ -14,8 +14,9 @@ class GenericTrainingAlgorithm:
         for i in range(nb_it):
             indexes = np.random.randint(0, batch_size-1, nb_samples)
             for ind in indexes:
-                x, y = x_train[ind], y_train[ind]
-                
-                
-        
+                xi, yi = x_train[ind], y_train[ind]
+                losses = ((y, loss(y, yi) + feature_map(xi, y) @ self.w) for y in y_train)
+                yhat = max(losses, key=lambda x : x[1])[0]
+                grad = feature_map(xi, yhat) - feature_map(xi, yi)
+                self.w = self.w - lr * (alpha * self.w + grad)
     
