@@ -5,6 +5,7 @@ from sklearn.decomposition import PCA
 from sklearn.utils import shuffle
 import pickle
 
+import matplotlib.pyplot as plt
 
 Dataset = namedtuple("Dataset", ["x_train", "x_test", "y_train", "y_test"])
 
@@ -52,7 +53,14 @@ def get_dataset(PATH, class_list):
 
     print("done !")
     return Dataset(X_train, X_test, Y_train, Y_test)
+ 
+def plot_histo(bow):
     
+    bar_width = 5. # set this to whatever you want
+    positions = np.arange(1000)
+    plt.bar(positions, bow, bar_width)
+    #plt.xticks(positions + bar_width / 2, ('0', '1', '2', '3'))
+    plt.show()
 def save(obj, fname="../res/dataset.bin"):
     with open(fname, "wb") as f:
         pickle.dump(obj, f)

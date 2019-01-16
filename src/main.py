@@ -17,7 +17,7 @@ if __name__ == "__main__":
     
     bow = compute_bow(feat[0])
     # print("bow : ", bow)
-
+    plot_histo(bow)
     dateset = get_dataset(DATA, get_classes_image_net())
     save(dataset)
     # dataset = load()
