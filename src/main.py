@@ -13,5 +13,6 @@ if __name__ == "__main__":
     #     features.append(feat)
 
     bow = compute_bow(feat[0])
-    plt.hist(bow)
+    print("bow : ", bow)
+    plt.plot(range(len(bow)), bow)
     plt.show()
