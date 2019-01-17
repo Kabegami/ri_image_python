@@ -8,6 +8,15 @@ import pickle
 import matplotlib.pyplot as plt
 
 Dataset = namedtuple("Dataset", ["x_train", "x_test", "y_train", "y_test"])
+TrainingSample = namedtuple("TrainingSample", ["x", "y"])
+
+def sample(dataset, size=1, train=True):
+    if train:
+        ind = np.random.randint(0, len(dataset.x_train), size)  
+        return dataset.x_train[ind], dataset.y_train[ind]
+    else:
+        ind = np.random.randint(0, len(dataset.x_test), size)  
+        return dataset.x_test[ind], dataset.y_test[ind]
 
 def compute_bow(feature_list):
     v = np.zeros(get_dico_size())
