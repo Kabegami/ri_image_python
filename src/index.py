@@ -1,11 +1,12 @@
-from imageNetParser import get_dico_size, get_features
+from imageNetParser import get_dico_size, get_features, get_classes_image_net
 import numpy as np
 from collections import namedtuple
 from sklearn.decomposition import PCA
 from sklearn.utils import shuffle
 import pickle
-
+from itertools import product
 import matplotlib.pyplot as plt
+from nltk.corpus import wordnet as wn
 
 Dataset = namedtuple("Dataset", ["x_train", "x_test", "y_train", "y_test"])
 TrainingSample = namedtuple("TrainingSample", ["x", "y"])
@@ -28,40 +29,48 @@ def compute_bow(feature_list):
 
 def file_to_dataset(fname, label):
     features = get_features(fname)
-    x_train = [compute_bow(feat) for feat in features[:800]]
-    x_test = [compute_bow(feat) for feat in features[800:]]
-    y_train, y_test = np.array([label for _ in range(800)]), np.array([label for _ in features[800:]])
-    return x_train, x_test, y_train, y_test
+    X = [compute_bow(feat) for feat in features]
+    Y = np.array([label for _ in range(len(features))])
+    return X, Y, len(features)
 
 def get_dataset(PATH, class_list):
-    X_train, X_test, Y_train, Y_test = [], [], [], []
-    print("collecting bow")
+    X, Y, listN = [], [], []
     for label, cls in enumerate(class_list):
         fname = PATH + "/{}.txt".format(cls)
-        x_train, x_test, y_train, y_test = file_to_dataset(fname, label)
-        X_train.append(x_train)
-        X_test.append(x_test)
-        Y_train.append(y_train)
-        Y_test.append(y_test)
+        xi, yi, n = file_to_dataset(fname, label)
+        X.append(xi), Y.append(yi), listN.append(n)
         
     print("to numpy")
-    X_train = np.concatenate(X_train, axis=0)
-    X_test = np.concatenate(X_test, axis=0)
-    Y_train = np.concatenate(Y_train, axis=0)
-    Y_test = np.concatenate(Y_test, axis=0)
 
-    print(X_train.shape, X_test.shape, Y_train.shape, Y_test.shape)
+    cat = lambda x : np.concatenate(x, axis=0)
+    
+    X = np.concatenate(X, axis=0)
+    Y = np.concatenate(Y, axis=0)
 
-    print("shuffle")
-    X_train, Y_train = shuffle(X_train, Y_train)
-    X_test, Y_test = shuffle(X_test, Y_test)
+    # print(X_train.shape, X_test.shape, Y_train.shape, Y_test.shape)
+
+
 
     print("pca")
-    X_train = PCA(n_components = 250).fit_transform(X_train)
-    X_test = PCA(n_components = 250).fit_transform(X_test)
+    X = PCA(n_components = 250).fit_transform(X)
 
+
+    print("split train test")
+    x_train, x_test, y_train, y_test = [[] for i in range(4)]
+    acc = 0
+    for n in listN:
+        x_train.append(X[acc:acc+800]), x_test.append(X[acc+800: acc + n])
+        y_train.append(Y[acc:acc+800]), y_test.append(Y[acc+800: acc+ n])
+        acc += n
+
+    x_train, x_test, y_train, y_test = list(map(cat, (x_train, x_test, y_train, y_test)))
+        
+    print("shuffle")
+    x_train, y_train = shuffle(x_train, y_train)
+    x_test, y_test = shuffle(x_test, y_test)
+        
     print("done !")
-    return Dataset(X_train, X_test, Y_train, Y_test)
+    return Dataset(x_train, x_test, y_train, y_test)
  
 def plot_histo(bow):
     
@@ -78,11 +87,20 @@ def load(fname="../res/dataset.bin"):
     with open(fname, "rb") as f:
         data = pickle.load(f)
     return data
-    
-        
 
+def get_image_net_distances():
+    classes = get_classes_image_net()
+    mat = np.zeros((len(classes), len(classes)))
+    for i1, c1 in enumerate(classes):
+        for i2, c2 in enumerate(classes):
+            list_w1, list_w2 = wn.synsets(c1), wn.synsets(c2)
+            similarities = (w1.wup_similarity(w2) for w1, w2 in product(list_w1, list_w2))
+            similarity = max(filter(lambda x : x is not None, similarities))
+            mat[i1][i2] = similarity         
+    return 1 - mat
     
-
+def distance_normalisation(mat):
+    return mat * 1.9 + 0.1
 
 
     

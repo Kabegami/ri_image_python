@@ -3,7 +3,7 @@ from IStructInstantiation import *
 from tqdm import tqdm
 from tools import accuracy, accuracy_
 
-class LinearStructModel_Ex:
+class LinearStructModel:
     
     def __init__(self, dimpsi):
         #self.w = np.random.randn(dimpsi)
@@ -14,20 +14,25 @@ class LinearStructModel_Ex:
     
     def lai(self, xi, yi):
         return np.argmax([self.mc.delta(yi, y)+self.mc.psi(xi, y).dot(self.w) for y in range(9)])
+    
+    def loss(self, xi, yi):
+        return np.max([self.mc.delta(yi, y)+self.mc.psi(xi, y).dot(self.w) for y in range(9)])
+
         #, np.argmax([self.mc.psi(xi, y).dot(self.w) for y in range(9)])
     
-    def instantiation(self):
-        self.mc = MultiClass()
+    def instantiation(self, classe=MultiClass, kwargs={}):
+        self.mc = classe(**kwargs)
     
     def getParameters():
-        self.w  
+        self.w
 
+        
 
 class GenericTrainingAlgorithm(object):
-    def __init__(self, dimpsi, classe=LinearStructModel_Ex):
+    def __init__(self, dimpsi, classe=LinearStructModel, struct_classe=MultiClass, kwargs={}):
         self.dimpsi = dimpsi
         self.model = classe(dimpsi)
-        self.model.instantiation()
+        self.model.instantiation(struct_classe, kwargs)
         
     
     def fit(self, dataset, alpha=0.1, nb_it=10, lr=0.01, nb_samples=None, register=False):
@@ -62,45 +67,4 @@ class GenericTrainingAlgorithm(object):
     def predict(self, x):
         return self.model.predict(x)
  
-                
-class LinearStructModel:
-    
-    def __init__(self, dimpsi):
-        
-        self.w = np.random.randn(dimpsi)
-        
-    def predict(self, ts):
-        pass
-    
-    def lai(self, ts):
-        pass
-    
-    def instantiation(self):
-        self.isi = MultiClass()
-    
-    def getParameters():
-        self.w  
 
-
-class LinearStructModel_Ex:
-    
-    def __init__(self, dimpsi):
-        #self.w = np.random.randn(dimpsi)
-        self.w = np.zeros(dimpsi)
-        
-    def predict(self, x):
-        return np.argmax([self.mc.psi(x,y).dot(self.w) for y in range(9)])
-    
-    def lai(self, xi, yi):
-        return np.argmax([self.mc.delta(yi, y)+self.mc.psi(xi, y).dot(self.w) for y in range(9)])
-    
-    def loss(self, xi, yi):
-        return np.max([self.mc.delta(yi, y)+self.mc.psi(xi, y).dot(self.w) for y in range(9)])
-
-        #, np.argmax([self.mc.psi(xi, y).dot(self.w) for y in range(9)])
-    
-    def instantiation(self):
-        self.mc = MultiClass()
-    
-    def getParameters():
-        self.w  
