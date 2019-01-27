@@ -57,6 +57,9 @@ class GenericTrainingAlgorithm(object):
                 #yhat = max(losses, key=lambda x : x[1])[0]
                 yhat = self.model.lai(xi, yi)
                 grad = self.model.mc.psi(xi, yhat) - self.model.mc.psi(xi, yi)
+                # print("grad shape : ", grad.shape)
+                # print("self.w shape : ", self.model.w.shape)
+                # input("wait")
                 self.model.w = self.model.w - lr * (alpha * self.model.w + grad)
             if register:
                 L.append((accuracy(self, dataset, train=True), accuracy(self, dataset, train=False)))

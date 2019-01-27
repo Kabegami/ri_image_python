@@ -1,10 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jan 17 12:03:41 2019
-
-@author: 3603138
-"""
+import numpy as np
 
 def accuracy_(model, x, y):
     s = 0
@@ -20,3 +14,16 @@ def accuracy(model, dataset, train=True):
         return accuracy_(model, dataset.x_train, dataset.y_train)
     else:
         return accuracy_(model, dataset.x_test, dataset.y_test)
+
+def one_hot(target, nb_target):
+    v = np.zeros(nb_target)
+    v[target] = 1
+    return v
+    
+def foreach(f, it):
+    for e in it:
+        f(e)
+
+def swap(t):
+    "(x1, x2) -> (x2, x1)"
+    return tuple(reversed(t))
