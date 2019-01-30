@@ -1,6 +1,6 @@
 import numpy as np
 from collections import defaultdict, Counter
-from tools import foreach, swap
+from tools import foreach, swap, group_by, memoized
 
 
 def average_precision(precision, recall):
@@ -56,22 +56,33 @@ class RankingOutput(object):
         self.M = M
 
 class RankingInstantiation:
-    def __init__(self, ranking_output):
-        """ take the true labels as input"""
-        self.ranking_output = ranking_output
+    # def __init__(self, *args):
+    #     pass
 
-    def psi(self, X, Y):
+    @memoized
+    def psi(self, x, y):
         #X : list d'images
-        #Y : liste de rang
+        #Y : liste de labels  ou 
+        #y : un ordonancement dans lequel l'ensemble des + est placé avant l'ensemble des - 
+        #Je pense qu'il faut que le y soit un RankingOutput comme ça on a la fois la fois les labels et les rangs
+        # labels = group_by(y)
+        # pos_indexes = labels[1]
+        # neg_indexes = labels[-1]
+        # s = 0
+        # res = sorted(list(enumerate(y)), key=lambda x : x[1])
+        # rank, values = zip(*res)
+        # # rank = list(range(len(y)))
+        # ranking_output = RankingOutput(list(rank), y)
         s = 0
-        for pos_ind in self.ranking_output.ind_pos:
-            for neg_ind in self.ranking_output.ind_neg:
-                s += self.ranking_output.M[pos_ind][neg_ind] * (X[pos_ind, :] - X[neg_ind, : ])
+        for pos_ind in y.ind_pos:
+            for neg_ind in y.ind_neg:
+                s += y.M[pos_ind][neg_ind] * (x[pos_ind, :] - x[neg_ind, : ])
         return s
 
     def delta(self, yi=None, y=None):
-        #on n'utilise pas du tout le y pour l'instant !
-        return 1 - average_precision(*recall_precision(self.ranking_output))
+        """ y : labels, yi : ranking"""
+        ranking_output = RankingOutput(yi, y)
+        return 1 - average_precision(*recall_precision(ranking_output))
         
 
 def val_optj(j, k, skp, sjn, nbPlus, nbMinus):

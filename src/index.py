@@ -102,7 +102,11 @@ def get_image_net_distances():
 def distance_normalisation(mat):
     return mat * 1.9 + 0.1
 
-
+def convertClassif2Ranking(dataset, cls=1):
+    x_train, x_test, y_train, y_test = dataset
+    y_train = ((y_train == cls) * 2 - 1).astype(int)
+    y_test = ((y_test == cls) * 2 - 1).astype(int)
+    return Dataset(x_train, x_test, y_train, y_test)
     
     
 

@@ -29,35 +29,47 @@ def main_ranking():
     print(recall)
     print("average_precision : ", average_precision(precision, recall))
 
-    I = RankingInstantiation(ranking)
-    true_I = RankingInstantiation(true_ranking)
-    x = np.array([[5, 3, 2],
-                  [1, 2, 3],
-                  [8, 1, 5]])
-    print("psi : ", I.psi(x, y))
-    print("delta : ", I.delta())
-    print("true delta : ", true_I.delta())
-    
-    print("precision, recall : ", recall_precision(true_ranking))
-
     m = model.RankingStructModel(250)
     dataset = load()
     x, y = sample(dataset, 5, train=True)
     print(x.shape, y.shape)
     L = split(x)
-    foreach(lambda x : print(x.shape), L)
-    y = random_labels(len(L))
-    print(y)
+    # foreach(lambda x : print(x.shape), L)
+    labels = random_labels(len(L))
 
-    pred = m.predict(L, y)
-    print(pred)
-    M, rank, positioning = pred.M, pred.ranks, pred.positioning
-    print("M : ", M)
-    print("rank : ", rank)
-    print("positioning :", positioning)
+    dataset = convertClassif2Ranking(dataset, cls=1)
+    print(dataset.y_train)
+    x_train, y_train = dataset.x_train, dataset.y_train
+    x_test, y_test = dataset.x_test, dataset.y_test
 
-    print("loss : ", m.loss(pred))
+    rankingInst = RankingInstantiation()
+    # psi = rankingInst.psi(x_train, y_train)
+    # print("psi : ", psi)
+    # save()
+    # yhat = m.predict(x)
+    # print("yhat :", yhat)
+    # print("y : ", y)
+    # delta = rankingInst.delta(yhat, y_train)
 
+    # print("psi : ", psi)
+    # print("delta : ", delta)
+
+    dimpsi = 250
+
+    classifier = model.GenericTrainingAlgorithm(dimpsi, struct_classe=RankingInstantiation, classe=model.RankingStructModel)
+    # # print(accuracy(classifier, dataset))
+    
+    classifier.fit_ranking(dataset, nb_it=1, alpha=1e-6, lr=10)
+
+    rank = classifier.predict(x_train)
+    ranking = RankingOutput(rank, y_train)
+    precision, recall = recall_precision(ranking)
+    indexes = [i for i in range(len(precision))]
+    ratio = [p / c for (p, c) in zip(precision, recall)]
+    plt.plot(ratio, indexes)
+    plt.show()
+    AP = average_precision(precision, recall)
+    print("AP : AP")
     # loss = m.loss(L, y)
     # print("loss : ", loss)
     # M, rank, positioning = loss.M, loss.ranks, loss.positioning
@@ -90,6 +102,8 @@ def main_classif():
     x,y = sample(dataset, 1, train=False)
     y = y[0]
     print(x.shape, y.shape)
+    print("y : ", y)
+    input("wait")
     
 
     linear = model.LinearStructModel(dimpsi)
