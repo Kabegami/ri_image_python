@@ -1,13 +1,14 @@
 import numpy as np
 from IStructInstantiation import *
 from tqdm import tqdm
-from tools import accuracy, accuracy_
+from tools import accuracy, accuracy_, map2
+from ranking import *
 
 class LinearStructModel:
     
     def __init__(self, dimpsi):
-        #self.w = np.random.randn(dimpsi)
-        self.w = np.zeros(dimpsi)
+        self.w = np.random.randn(dimpsi)
+        # self.w = np.zeros(dimpsi)
         
     def predict(self, x):
         return np.argmax([self.mc.psi(x,y).dot(self.w) for y in range(9)])
@@ -26,6 +27,25 @@ class LinearStructModel:
     def getParameters():
         self.w
 
+class RankingStructModel(LinearStructModel):
+    def __init__(self, dimpsi):
+        super(RankingStructModel, self).__init__(dimpsi)
+
+    # def predict(self, X, labelsGT):
+    #     """X : liste de vecteurs,
+    #     ranking : trier la liste par ordre decroissant de <w, phi(x)>"""
+    #     it = list(enumerate(map(lambda x: self.w @ x, X)))
+    #     sorted_it = sorted(it, key=lambda x : x[1], reverse=True)
+    #     positions, value = zip(*sorted_it)
+    #     it = sorted(list(enumerate(positions)), key=lambda x : x[1])
+    #     ranks, indexes = zip(*it)
+    #     return RankingOutput(list(ranks), labelsGT)
+
+    def predict(self, X, labelsGT):
+        return loss_augmented_inference(X, self.w, labelsGT)
+        
+    def loss(self, ranking_output):
+        return 1 - average_precision(*recall_precision(ranking_output))
         
 
 class GenericTrainingAlgorithm(object):

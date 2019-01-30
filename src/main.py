@@ -4,17 +4,68 @@ from index import *
 import matplotlib.pyplot as plt
 import model
 from sklearn.decomposition import PCA
-from tools import accuracy
+from tools import accuracy, split, foreach, random_rank, random_labels
 from sklearn.metrics import confusion_matrix
 from itertools import product
 from IStructInstantiation import *
 import numpy as np
+from ranking import *
 
-def foreach(f, it):
-    for e in it:
-        f(e)
 
-if __name__ == "__main__":
+def main_ranking():
+    """x : liste de représentation des images, y : un ordonancement pour lequel l’ensemble des images + est placé avant l’ensemble des images -"""
+    y = [3, 2, 1]
+    ranking = RankingOutput(y, [1, 1, -1])
+    true_ranking = RankingOutput(y, [-1, 1, 1])
+    M, rank, positioning = ranking.M, ranking.ranks, ranking.positioning
+    print(M)
+    assert (np.all(M == np.array([[0, -1, -1],
+                                  [1, 0, -1],
+                                  [1, 1, 0]])))
+    print(rank)
+    print(positioning)
+    precision, recall = recall_precision(ranking)
+    print(precision)
+    print(recall)
+    print("average_precision : ", average_precision(precision, recall))
+
+    I = RankingInstantiation(ranking)
+    true_I = RankingInstantiation(true_ranking)
+    x = np.array([[5, 3, 2],
+                  [1, 2, 3],
+                  [8, 1, 5]])
+    print("psi : ", I.psi(x, y))
+    print("delta : ", I.delta())
+    print("true delta : ", true_I.delta())
+    
+    print("precision, recall : ", recall_precision(true_ranking))
+
+    m = model.RankingStructModel(250)
+    dataset = load()
+    x, y = sample(dataset, 5, train=True)
+    print(x.shape, y.shape)
+    L = split(x)
+    foreach(lambda x : print(x.shape), L)
+    y = random_labels(len(L))
+    print(y)
+
+    pred = m.predict(L, y)
+    print(pred)
+    M, rank, positioning = pred.M, pred.ranks, pred.positioning
+    print("M : ", M)
+    print("rank : ", rank)
+    print("positioning :", positioning)
+
+    print("loss : ", m.loss(pred))
+
+    # loss = m.loss(L, y)
+    # print("loss : ", loss)
+    # M, rank, positioning = loss.M, loss.ranks, loss.positioning
+    # print("M : ", M)
+    # print("rank : ", rank)
+    # print("positioning :", positioning)
+
+def main_classif():
     DATA = "../data"
     #directory = Path(DATA)
     features = []
@@ -93,7 +144,6 @@ if __name__ == "__main__":
     # dataset = load()
     # print([x.shape for x in dataset])
     
-    
-
-
-
+if __name__ == "__main__":
+    # main_classif()
+    main_ranking()
