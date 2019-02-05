@@ -4,7 +4,7 @@ from index import *
 import matplotlib.pyplot as plt
 import model
 from sklearn.decomposition import PCA
-from tools import accuracy, split, foreach, random_rank, random_labels
+from tools import accuracy, split, foreach, random_rank, random_labels, plot_confusion_matrix
 from sklearn.metrics import confusion_matrix
 from itertools import product
 from IStructInstantiation import *
@@ -118,7 +118,8 @@ def main_classif():
     # mat = distance_normalisation(get_image_net_distances())
     # print("mat : ", mat)
 
-    nbit=100
+    # nbit=100
+    nbit = 1
     classifier = model.GenericTrainingAlgorithm(dimpsi)
 
     # classifier = model.GenericTrainingAlgorithm(dimpsi, struct_classe=MultiClassFier, kwargs={"mat" : mat})
@@ -135,9 +136,11 @@ def main_classif():
     
 
     # #test
-    # classes = get_classes_image_net()
-    # pred = [classifier.predict(x) for x in dataset.x_test]
-    # mat = confusion_matrix(dataset.y_test, pred)
+    classes = get_classes_image_net()
+    pred = [classifier.predict(x) for x in dataset.x_test]
+    mat = confusion_matrix(dataset.y_test, pred)
+    plot_confusion_matrix(mat, classes, title="Test confusion matrix")
+    plt.show()
     # plt.imshow(mat)
     # plt.xticks(range(9), classes, rotation=90)
     # plt.yticks(range(9), classes)
@@ -159,5 +162,5 @@ def main_classif():
     # print([x.shape for x in dataset])
     
 if __name__ == "__main__":
-    # main_classif()
-    main_ranking()
+    main_classif()
+    # main_ranking()
