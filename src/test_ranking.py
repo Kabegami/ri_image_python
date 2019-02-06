@@ -23,8 +23,10 @@ def main(cls=1, nb_it=50):
     x_train, y_train = dataset.x_train, dataset.y_train
     x_test, y_test = dataset.x_test, dataset.y_test
 
+
     classifier = model.GenericTrainingAlgorithm(dimpsi, struct_classe=RankingInstantiation, classe=model.RankingStructModel)
-    classifier.fit_ranking(dataset, nb_it=nb_it, alpha=1e-6, lr=10)
+    # classifier.fit_ranking(dataset, nb_it=nb_it, alpha=1e-6, lr=10)
+    classifier.fit_ranking(dataset, nb_it=nb_it, lr=1e-6, alpha=10)
 
     name = "../res/model_{}.bin".format(classes[cls])
     classifier.save(name)

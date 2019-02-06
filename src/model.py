@@ -8,8 +8,8 @@ import pickle
 class LinearStructModel:
     
     def __init__(self, dimpsi):
-        self.w = np.random.randn(dimpsi)
-        # self.w = np.zeros(dimpsi)
+        # self.w = np.random.randn(dimpsi)
+        self.w = np.zeros(dimpsi)
         
     def predict(self, x):
         return np.argmax([self.mc.psi(x,y).dot(self.w) for y in range(9)])
@@ -120,6 +120,7 @@ class GenericTrainingAlgorithm(object):
         for i in tqdm(range(nb_it)):
             xi, yi = dataset.x_train, dataset.y_train
             yhat = self.model.lai(xi, yi)
+            # print("loss : ", self.model.mc.delta(yhat.rank, yi))
             grad = self.model.mc.psi(xi, yhat) - self.model.mc.psi(xi, y)
             self.model.w = self.model.w - lr * (alpha * self.model.w + grad)
 
