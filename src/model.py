@@ -3,6 +3,7 @@ from IStructInstantiation import *
 from tqdm import tqdm
 from tools import accuracy, accuracy_, map2
 from ranking import *
+import pickle
 
 class LinearStructModel:
     
@@ -18,14 +19,21 @@ class LinearStructModel:
     
     def loss(self, xi, yi):
         return np.max([self.mc.delta(yi, y)+self.mc.psi(xi, y).dot(self.w) for y in range(9)])
-
-        #, np.argmax([self.mc.psi(xi, y).dot(self.w) for y in range(9)])
     
     def instantiation(self, classe=MultiClass, kwargs={}):
         self.mc = classe(**kwargs)
     
-    def getParameters():
-        self.w
+    def getParameters(self):
+        return self.w
+
+    def save(self, fname="../res/model.bin"):
+        with open(fname, "wb") as f:
+            pickle.dump(self.w, f)
+
+    def load(self, fname="../res/model.bin"):
+        with open(fname, "rb") as f:
+            self.w = pickle.load(f)
+
 
 class RankingStructModel(LinearStructModel):
     def __init__(self, dimpsi):
@@ -55,6 +63,14 @@ class RankingStructModel(LinearStructModel):
 
     # def instantiation(self, classe=RankingInstantiation, kwargs={}):
     #     self.mc = classes(**kwargs)
+
+    def save(self, fname="../res/model.bin"):
+        with open(fname, "wb") as f:
+            pickle.dump(self.w, f)
+
+    def load(self, fname="../res/model.bin"):
+        with open(fname, "rb") as f:
+            self.w = pickle.load(f)
         
 
 class GenericTrainingAlgorithm(object):
@@ -111,4 +127,8 @@ class GenericTrainingAlgorithm(object):
     def predict(self, x):
         return self.model.predict(x)
  
+    def save(self, fname="../res/model.bin"):
+        self.model.save(fname)
 
+    def load(self, fname="../res/model.bin"):
+        self.model.load(fname)

@@ -4,6 +4,8 @@ from collections import defaultdict
 import collections
 import functools
 import pickle
+import matplotlib.pyplot as plt
+import itertools
 
 def accuracy_(model, x, y):
     s = 0
@@ -121,7 +123,7 @@ def plot_confusion_matrix(cm, classes,
     plt.title(title)
     plt.colorbar()
     tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45)
+    plt.xticks(tick_marks, classes, rotation=90)
     plt.yticks(tick_marks, classes)
 
     fmt = '.2f' if normalize else 'd'

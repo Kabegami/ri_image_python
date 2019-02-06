@@ -1,14 +1,65 @@
 import numpy as np
 from collections import defaultdict, Counter
 from tools import foreach, swap, group_by, memoized
+from sklearn import metrics
+from sklearn.utils.fixes import signature
+import matplotlib.pyplot as plt
 
 
 def average_precision(precision, recall):
-    ap = 0
-    for j in range(len(precision) - 1):
-        #retourne 0 quand on a un recall de 1...
-        ap += (precision[j+1] + precision[j]) * (recall[j+1] - recall[j]) / 2.0
-    return ap
+    return metrics.auc(recall, precision)
+    # ap = 0
+    # for j in range(len(precision) - 1):
+    #     #retourne 0 quand on a un recall de 1...
+    #     ap += (precision[j+1] + precision[j]) * (recall[j+1] - recall[j]) / 2.0
+    # return ap
+
+def plot_precision_recall_curve(precision, recall, data_type="train"):
+    # ranking = RankingOutput(pred, target)
+    # precision, recall = recall_precision(ranking)
+    # average_precision = metrics.auc(recall, precision)
+
+    # In matplotlib < 1.5, plt.fill_between does not have a 'step' argument
+    step_kwargs = ({'step': 'post'}
+               if 'step' in signature(plt.fill_between).parameters
+               else {})
+    plt.step(recall, precision, color='b', alpha=0.2,
+             where='post')
+    plt.fill_between(recall, precision, alpha=0.2, color='b', **step_kwargs)
+
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.ylim([0.0, 1.05])
+    plt.xlim([0.0, 1.0])
+    plt.title(data_type + ' Precision-Recall curve: AP={0:0.2f}'.format(average_precision))
+    plt.show()
+    
+def plot_precision_recall(prec, recall_points, baseline):
+    plt.plot(recall_points, prec, label="precision recall curve")
+    plt.plot(recall_points, [baseline for _ in range(len(recall_points))], label="baseline")
+    plt.xlabel("Recall")
+    plt.ylabel("Precision")
+    plt.title("Precision-Recall curve on train data")
+    plt.legend()
+    plt.show()
+
+def points_precision_recall(precision, recall):
+    recall_points = [i / 10 for i in range(1, 11)]
+    indices = []
+    i =0
+    for k, rec in enumerate(recall):
+        if rec > recall_points[i]:
+            indices.append(k)
+            i += 1
+    if len(indices) != len(recall_points):
+        indices.append(-1)
+    assert(len(indices) == len(recall_points))
+    pr10 = [precision[i] for i in indices]
+    # pr10, rec10 = zip(*[(precision[i], recall[i]) for i in indices])
+    rec10 = recall_points
+    pr10 = [1] + list(pr10)
+    rec10 = [0] + rec10
+    return pr10, rec10
 
 def recall_precision(ranking_output):
     nb_pos = len(ranking_output.ind_pos)
