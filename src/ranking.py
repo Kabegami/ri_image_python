@@ -103,7 +103,7 @@ class RankingOutput(object):
             for (ind, rank) in tail:
                 M[head_ind][ind] = 2
             M[head_ind][head_ind] = 1
-        M = M - 1
+        M -= 1
         self.M = M
 
 class RankingInstantiation:
